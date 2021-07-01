@@ -6,6 +6,9 @@ var myGameContext = myGameCanvas.getContext("2d");
 function gameInit(){
     myGameCanvas.height = gameHight;
     myGameCanvas.width = gameWidth;
+	document.getElementById("inputDiv").setAttribute('style','position:fixed;top:0px;left:0px;');
+	document.getElementById("inputDiv").style.top=(myGameCanvas.offsetTop+450)+"px";
+	document.getElementById("inputDiv").style.left=(myGameCanvas.offsetLeft+10)+"px";
     setGetMousePosition();
 }
 
@@ -84,6 +87,9 @@ function drawObject(){ //绘图
         if(isShowLeaderboard()){
             drawLeaderboard();
         }
+		if(isShowInstruction()){
+			drawInstruction();
+		}
     }
 
     if(gameStatu == "playing"){
@@ -127,7 +133,29 @@ function menuStatu(){ //菜单界面事件处理
             height:390
         }
     }
-
+	
+	if(isShowInstruction()){
+		instructionPosition={
+			x:0,
+			y:200
+		}
+		instructionSize={
+			width:230,
+			height:390
+		}
+		document.getElementById("inputDiv").style.visibility='visible';
+	} else {
+		instructionPosition={
+			x:0,
+			y:200
+		}
+		instructionSize={
+			width:25,
+			height:390
+		}
+		document.getElementById("inputDiv").style.visibility='hidden';
+	}
+	
     if(isMouseClick() && isMouseInBlock()){
         gameStatu = "playing";
         score = 0;
@@ -177,6 +205,38 @@ function isShowLeaderboard(){
         return false;
     }
     if(mousePosition.y<leaderboardPosition.y || mousePosition.y>leaderboardPosition.y+leaderboardSize.height){
+        return false;
+    }
+    return true;
+}
+
+function drawInstruction(){
+    myGameContext.save();
+    myGameContext.fillStyle = "#BEBEBE";
+    myGameContext.fillRect(0,200,instructionSize.width,instructionSize.height);
+	drawInstructionText();
+    myGameContext.restore();
+}
+
+function drawInstructionText(){
+	myGameContext.save();
+	myGameContext.fillStyle = "#FFFFFF";
+    myGameContext.font = "20px sans-serif";
+    myGameContext.fillText(" click the white to start", 0, 230);
+    myGameContext.fillText(" and follow the white", 0, 260);
+    myGameContext.fillText(" you can upload your sc", 0, 300);
+    myGameContext.fillText(" ore under here", 0, 330);
+    myGameContext.fillText(" only 1-10 are display", 0, 360);
+    myGameContext.fillText(" your score:"+score, 0, 400);
+	myGameContext.fillText(" your name: ",0, 430);
+	myGameContext.restore();
+}
+
+function isShowInstruction(){
+    if(mousePosition.x<instructionPosition.x || mousePosition.x>instructionPosition.x+instructionSize.width){
+        return false;
+    }
+    if(mousePosition.y<instructionPosition.y || mousePosition.y>instructionPosition.y+instructionSize.height){
         return false;
     }
     return true;
@@ -244,12 +304,23 @@ var leaderboardSize = {
     height:390
 }
 
+var instructionPosition = {
+	x:0,
+	y:200
+}
+
+var instructionSize = {
+	wihth:225,
+	height:390
+}
+
 var blockSpeed = 2;
 var blockSize = 100;
 var gameWidth = 800;
 var gameHight = 600;
 var gameStatu = "menu";
 var score = 0;
+var userName = "";
 
 function main(){
     gameInit();
@@ -287,3 +358,33 @@ function loadXMLDoc()
 }
 
 loadXMLDoc();
+
+var uploadResponse;
+
+function uploadScore()
+{
+	userName=document.getElementById("userName").value;
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	{
+		//  IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+		xmlhttp=new XMLHttpRequest();
+	}
+	else
+	{
+		// IE6, IE5 浏览器执行代码
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+			uploadResponse=xmlhttp.responseText;
+		}
+	}
+	xmlhttp.open("GET","uploadScore.jsp?name="+userName+"&score="+score,true);
+	console.log("uploadScore.jsp?name="+userName+"&score="+score);
+	xmlhttp.send();
+}
+
+
